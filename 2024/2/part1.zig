@@ -18,30 +18,31 @@ pub fn main() !void {
 
     var safe_count: u32 = 0;
     for (reports.reports.items) |report| {
-        var safely_decreasing = true;
-        for (report.items[0 .. report.items.len - 1], report.items[1..]) |last_item, item| {
-            const diff = last_item - item;
-            if (diff < 1 or diff > 3) safely_decreasing = false;
-        }
-
-        if (safely_decreasing) {
+        if (is_safely_decreasing(report.items) or is_safely_increasing(report.items)) {
             safe_count += 1;
-            continue;
-        }
-
-        var safely_increasing = true;
-        for (report.items[0 .. report.items.len - 1], report.items[1..]) |last_item, item| {
-            const diff = item - last_item;
-            if (diff < 1 or diff > 3) safely_increasing = false;
-        }
-
-        if (safely_increasing) {
-            safe_count += 1;
-            continue;
         }
     }
 
     std.debug.print("part1: {}\n", .{safe_count});
+}
+
+fn is_safely_decreasing(items: []i32) bool {
+    var safely_decreasing = true;
+    for (items[0 .. items.len - 1], items[1..]) |last_item, item| {
+        const diff = last_item - item;
+        if (diff < 1 or diff > 3) safely_decreasing = false;
+    }
+    return safely_decreasing;
+}
+
+fn is_safely_increasing(items: []i32) bool {
+    var safely_increasing = true;
+    for (items[0 .. items.len - 1], items[1..]) |last_item, item| {
+        const diff = item - last_item;
+        if (diff < 1 or diff > 3) safely_increasing = false;
+    }
+
+    return safely_increasing;
 }
 
 fn get_input(allocator: Allocator, day: u8) ![]u8 {

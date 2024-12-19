@@ -17,57 +17,43 @@ pub fn main() !void {
     }
 
     var safe_count: u32 = 0;
-    for (reports.reports.items) |report| {
-        var safely_decreasing = true;
-        var corrections: u32 = 0;
-        for (report.items[1..], 1..) |item, i| {
-            const last_item = report.items[i - 1];
-            const diff = last_item - item;
-            if (diff < 1 or diff > 3) {
-                corrections += 1;
-                if (i == report.items.len - 1) {
-                    continue;
-                }
-                if (i >= 2) {
-                    const wide_diff = report.items[i - 2] - item;
-                    if (wide_diff < 1 or wide_diff > 3) {
-                        safely_decreasing = false;
-                    }
-                }
-            }
-        }
-
-        if (safely_decreasing and corrections <= 1) {
+    reports_loop: for (reports.reports.items) |report| {
+        if (is_safely_increasing(report.items) or is_safely_decreasing(report.items)) {
             safe_count += 1;
             continue;
         }
 
-        var safely_increasing = true;
-        corrections = 0;
-        for (report.items[1..], 1..) |item, i| {
-            const last_item = report.items[i - 1];
-            const diff = item - last_item;
-            if (diff < 1 or diff > 3) {
-                corrections += 1;
-                if (i == report.items.len - 1) {
-                    continue;
-                }
-                if (i >= 2) {
-                    const wide_diff = item - report.items[i - 2];
-                    if (wide_diff < 1 or wide_diff > 3) {
-                        safely_increasing = false;
-                    }
-                }
+        for (0..report.items.len) |skipped_report| {
+            var cloned = try report.clone();
+            defer cloned.deinit();
+            _ = cloned.orderedRemove(skipped_report);
+            if (is_safely_increasing(cloned.items) or is_safely_decreasing(cloned.items)) {
+                safe_count += 1;
+                continue :reports_loop;
             }
-        }
-
-        if (safely_increasing and corrections <= 1) {
-            safe_count += 1;
-            continue;
         }
     }
 
     std.debug.print("part2: {}\n", .{safe_count});
+}
+
+fn is_safely_decreasing(items: []i32) bool {
+    var safely_decreasing = true;
+    for (items[0 .. items.len - 1], items[1..]) |last_item, item| {
+        const diff = last_item - item;
+        if (diff < 1 or diff > 3) safely_decreasing = false;
+    }
+    return safely_decreasing;
+}
+
+fn is_safely_increasing(items: []i32) bool {
+    var safely_increasing = true;
+    for (items[0 .. items.len - 1], items[1..]) |last_item, item| {
+        const diff = item - last_item;
+        if (diff < 1 or diff > 3) safely_increasing = false;
+    }
+
+    return safely_increasing;
 }
 
 fn get_input(allocator: Allocator, day: u8) ![]u8 {
