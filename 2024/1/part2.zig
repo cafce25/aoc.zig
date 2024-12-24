@@ -1,25 +1,15 @@
 const std = @import("std");
+const get_input = @import("util").get_input;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     defer _ = gpa.deinit();
 
-    var client = std.http.Client{ .allocator = allocator };
-    defer client.deinit();
-
-    var buf: [4096]u8 = undefined;
-    const uri = try std.Uri.parse("https://jbirk.de/~jona/aoc/input/2024/1");
-    var request = try client.open(std.http.Method.GET, uri, .{ .server_header_buffer = &buf });
-    defer request.deinit();
-    _ = try request.send();
-    _ = try request.finish();
-    _ = try request.wait();
-
-    const response_body = try request.reader().readAllAlloc(allocator, 4 * 1024 * 1024 * 1024);
+    const response_body = try get_input(allocator, 2024, 1);
     defer allocator.free(response_body);
 
-    var n_lines: u32 = 0;
+    var n_lines: u33 = 1;
     for (response_body) |c| {
         if (c == '\n') {
             n_lines += 1;

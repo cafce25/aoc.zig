@@ -14,6 +14,20 @@ pub fn build(b: *std.Build) !void {
 
     const test_step = b.step("test", "Run unit tests");
 
+    const util = b.addModule("aoc_util", .{
+        .root_source_file = b.path("util.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const util_unit_tests = b.addTest(.{
+        .root_source_file = b.path("util.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    test_step.dependOn(&util_unit_tests.step);
+
     for (2015..2024 + 1) |year| {
         for (1..25 + 1) |day| {
             // TODO is this really the best way for an inclusive range‽
@@ -38,6 +52,9 @@ pub fn build(b: *std.Build) !void {
                     .target = target,
                     .optimize = optimize,
                 });
+
+                exe.root_module.addImport("util", util);
+
                 b.installArtifact(exe);
                 const run_cmd = b.addRunArtifact(exe);
                 run_cmd.step.dependOn(b.getInstallStep());

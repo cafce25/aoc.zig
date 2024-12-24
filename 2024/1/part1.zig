@@ -1,25 +1,17 @@
 const std = @import("std");
+const get_input = @import("util").get_input;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     defer _ = gpa.deinit();
 
-    var client = std.http.Client{ .allocator = allocator };
-    defer client.deinit();
+    std.debug.print("{s}\n", .{@src().file});
 
-    var buf: [4096]u8 = undefined;
-    const uri = try std.Uri.parse("https://jbirk.de/~jona/aoc/input/2024/1");
-    var request = try client.open(std.http.Method.GET, uri, .{ .server_header_buffer = &buf });
-    defer request.deinit();
-    _ = try request.send();
-    _ = try request.finish();
-    _ = try request.wait();
-
-    const response_body = try request.reader().readAllAlloc(allocator, 4 * 1024 * 1024 * 1024);
+    const response_body = try get_input(allocator, 2024, 1);
     defer allocator.free(response_body);
 
-    var n_lines: u32 = 0;
+    var n_lines: u32 = 1;
     for (response_body) |c| {
         if (c == '\n') {
             n_lines += 1;
@@ -55,11 +47,4 @@ pub fn main() !void {
         total_diff += @abs(a - b);
     }
     std.debug.print("part1: {}\n", .{total_diff});
-}
-
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
 }
