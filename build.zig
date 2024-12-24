@@ -26,7 +26,9 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    test_step.dependOn(&util_unit_tests.step);
+    const run_util_unit_tests = b.addRunArtifact(util_unit_tests);
+
+    test_step.dependOn(&run_util_unit_tests.step);
 
     for (2015..2024 + 1) |year| {
         for (1..25 + 1) |day| {
