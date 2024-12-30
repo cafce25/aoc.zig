@@ -1,4 +1,5 @@
 const std = @import("std");
+pub const parser_combinator = @import("util/parser_combinator.zig");
 
 pub fn get_input(allocator: std.mem.Allocator, year: u16, day: u8) ![]u8 {
     var client = std.http.Client{ .allocator = allocator };
@@ -23,4 +24,8 @@ pub fn get_input(allocator: std.mem.Allocator, year: u16, day: u8) ![]u8 {
     } else {
         return try allocator.realloc(response_body, trimmed);
     }
+}
+
+test "parser_combinator" {
+    std.testing.refAllDeclsRecursive(parser_combinator);
 }
